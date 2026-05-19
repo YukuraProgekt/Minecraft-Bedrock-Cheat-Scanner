@@ -1,45 +1,40 @@
 package com.rollixmc.anticheat
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+data class ScanResult(
+    val path: String,
+    val reason: String,
+    val md5Hash: String = ""
+)
 
-    sealed class UiState {
-        object Idle : UiState()
-        object Scanning : UiState()
-        data class Results(val items: List<ScanResult>) : UiState()
-    }
+sealed class UiState {
+    object Idle : UiState()
+    data class Scanning(val scanned: Int = 0, val total: Int = 0) : UiState()
+    data class Results(val items: List<ScanResult>) : UiState()
+}
+
+class MainViewModel : ViewModel() {
 
     private val _state = MutableStateFlow<UiState>(UiState.Idle)
-    val state: StateFlow<UiState> = _state
+    val state = _state.asStateFlow()
 
-    private val _events = Channel<Event>(Channel.BUFFERED)
-    val events = _events.receiveAsFlow()
-
-    fun requestManageAllFiles() {
-        viewModelScope.launch {
-            _events.send(Event.ShowManageAllFilesIntent)
-        }
-    }
+    private val scanner = CheatScanner()
 
     fun scan() {
         viewModelScope.launch(Dispatchers.IO) {
-            _state.emit(UiState.Scanning)
-            val scanner = CheatScanner()
-            val results = scanner.scan(getApplication())
-            _state.emit(UiState.Results(results))
-        }
-    }
+            _state.value = UiState.Scanning(0, 0)
 
-    sealed class Event {
-        object ShowManageAllFilesIntent : Event()
+            val results = scanner.scanAll { scanned, total ->
+                _state.value = UiState.Scanning(scanned, total)
+            }
+
+            _state.value = UiState.Results(results)
+        }
     }
 }
