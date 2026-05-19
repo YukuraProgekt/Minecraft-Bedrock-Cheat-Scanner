@@ -1,0 +1,59 @@
+# Gradle
+.gradle/
+build/
+*.apk
+*.ap_
+*.dex
+*.class
+
+# Android Studio
+.idea/
+.classpath
+.project
+.settings/
+local.properties
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Build generated files
+bin/
+gen/
+out/
+
+# Dependencies
+libs/
+
+# Misc
+.gradle
+.idea
+local.properties
+*.jks
+*.keystore
+
+# Gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
+.sublime-*
+nbproject/
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Android-specific
+proguard/
+proguard-project.txt
